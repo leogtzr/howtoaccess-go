@@ -18,3 +18,6 @@ check:
 cover:
 	go test -coverprofile cp.out
 	go tool cover -html=cp.out
+
+run:
+	./howtoaccess -input "${HOME}/inputs/HowToAccess.csv"

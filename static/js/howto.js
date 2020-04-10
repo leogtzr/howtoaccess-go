@@ -107,7 +107,6 @@ $(document).ready(function () {
             success: function(data) {
                 var types = JSON.parse(data);
                 for (i = 0; i < types.length; i++) {
-                    // $('#coworkers').append($('<li name="1" class="list-group-item">').append(types[i]));
                     $('#coworkers').append(
                         $('<li name="1" class="list-group-item">').append(
                             $('<a>').attr('href','/person/' + types[i].ID).append(
@@ -122,86 +121,6 @@ $(document).ready(function () {
             }
         });
     }
-
-    // ~~~~~~~~~~~~~~~~~~~~ Interactions ... 
-    var familyInteractions = $('#family_interactions');
-    if (familyInteractions.length) {
-        $.ajax({
-            url: '/familyinteractions',
-            type: 'GET',
-            data: {},
-            success: function(data) {
-                var types = JSON.parse(data);
-                for (i = 0; i < types.length; i++) {
-                    var comment = types[i].Comment;
-                    comment = comment.substring(0, 20) + '...';
-                    $('#family_interactions').append(
-                        $('<li name="1" class="list-group-item">').append(
-                            $('<a>').attr('href','/interaction/' + types[i].ID).append(
-                                $('<span>').attr('class', 'badge badge-light').append(types[i].Person + ' on ' + types[i].Date + ' ' + comment)
-                    )));
-                }
-            },
-            error: function(data) {
-                console.log('woops! :(');
-                console.log(data);
-            }
-        });
-    }
-
-    var friendInteractions = $('#friend_interactions');
-    if (friendInteractions.length) {
-        $.ajax({
-            url: '/friendinteractions',
-            type: 'GET',
-            data: {},
-            success: function(data) {
-                var types = JSON.parse(data);
-                for (i = 0; i < types.length; i++) {
-                    var comment = types[i].Comment;
-                    comment = comment.substring(0, 20) + '...';
-                    //$('#friend_interactions').append($('<li name="1" class="list-group-item">').append(types[i].Person + ' ' + comment));
-                    $('#friend_interactions').append(
-                        $('<li name="1" class="list-group-item">').append(
-                            $('<a>').attr('href','/interaction/' + types[i].ID).append(
-                                $('<span>').attr('class', 'badge badge-light').append(types[i].Person + ' on ' + types[i].Date + ' ' + comment)
-                    )));
-                }
-            },
-            error: function(data) {
-                console.log('woops! :(');
-                console.log(data);
-            }
-        });
-    }
-
-    var coworkersInteractions = $('#coworkers_interactions');
-    if (coworkersInteractions.length) {
-        $.ajax({
-            url: '/coworkersinteractions',
-            type: 'GET',
-            data: {},
-            success: function(data) {
-                var types = JSON.parse(data);
-                for (i = 0; i < types.length; i++) {
-                    var comment = types[i].Comment;
-                    comment = comment.substring(0, 20) + '...';
-
-                    $('#coworkers_interactions').append(
-                        $('<li name="1" class="list-group-item">').append(
-                            $('<a>').attr('href','/interaction/' + types[i].ID).append(
-                                $('<span>').attr('class', 'badge badge-light').append(types[i].Person + ' on ' + types[i].Date + ' ' + comment)
-                    )));
-                    console.log("Persona: " + types[i]);
-                }
-            },
-            error: function(data) {
-                console.log('woops! :(');
-                console.log(data);
-            }
-        });
-    }
-    // ~~~~~~~~~~~~~~~~~~~~ Interactions ... 
 
     $('#addperson').on('submit', function(e) {
 
@@ -235,22 +154,24 @@ $(document).ready(function () {
 
     $('#edit').on('submit', function(e) {
 
-        //console.log('TRying to edit ... ');
-
         var currentForm = this;
         e.preventDefault();
-        var text = $('#interactiontext').val();
-        var personId = $('#persons').find(":selected").attr('name');
-        var date = $('#date').val();
+
+        var id = $('#id').val();
+        var serverDestination = $('#serverDestination').val();
+        var userDestination = $('#userDestination').val();
+        var from = $('#from').val();
+        var notes = $('#notes').val();
 
         $.ajax({
-            url: '/addinteraction',
+            url: '/editserver',
             type: 'POST',
-            data: {personId: personId, comment: text, date: date},
+            data: {id: id, serverDestination: serverDestination, userDestination: userDestination, from: from, notes: notes},
             success: function(data) {
                 $('#interactiontext').val('');
                 $("#alert").fadeTo(2000, 500).slideUp(500, function() {
                     $("#alert").slideUp(500);
+                    window.location = "/";
                 });
             },
             error: function(data) {

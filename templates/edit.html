@@ -34,6 +34,7 @@
 
             <form method="post" id="edit">
                 <div class="form-group">
+                    <input type="hidden" value="{{.ID}}" id="id"/>
                     <label for="persons">Server Destination</label>
                     <input type="text" class="form-control" id="serverDestination" required value="{{.ServerDestination}}"/>
                 </div>
@@ -47,7 +48,7 @@
                 </div>
                 <div class="form-group">
                     <label for="persons">Notes</label>
-                    <textarea class="form-control" id="notes" required>{{.Notes}}</textarea>
+                    <textarea class="form-control" id="notes">{{.Notes}}</textarea>
                 </div>
 
                 <div class="alert alert-danger alert-dismissible fade show" role="alert" id="alert_error">
@@ -105,6 +106,6 @@
     <script src="/static/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-3.3.1.min.js"></script>
     <script src="/static/js/bootstrap-datepicker.min.js"></script>
-    <script src="/static/js/cbe.js"></script>
+    <script src="/static/js/howto.js"></script>
 </body>
 </html>

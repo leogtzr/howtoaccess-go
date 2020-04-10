@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 )
 
 // Route ...
@@ -24,8 +25,11 @@ type Route struct {
 
 // Access ...
 type Access struct {
-	ID                                              int
-	ServerDestination, UserDestination, From, Notes string
+	ID                int    `json:"id"`
+	ServerDestination string `json:"serverDestination"`
+	UserDestination   string `json:"userDestination"`
+	From              string `json:"from"`
+	Notes             string `json:"notes"`
 }
 
 // HandlerFunc2 ...
@@ -43,6 +47,13 @@ var (
 	connPort    = "8081"
 
 	routes = Routes{
+
+		// Route{
+		// 	"editserver",
+		// 	"POST",
+		// 	"/editserver",
+		// 	auth(homePage, enterYourUserNamePassword, accesses),
+		// },
 
 		// Route{
 		// 	"getPersons",
@@ -102,6 +113,17 @@ func searchByID(id int, accesses *[]Access) (Access, bool) {
 	return acc, found
 }
 
+func getIndexByID(id int, accesses *[]Access) int {
+	idx := -1
+	for i, a := range *accesses {
+		if a.ID == id {
+			idx = i
+			break
+		}
+	}
+	return idx
+}
+
 func sendHome(w *http.ResponseWriter, accesses *[]Access) {
 	parsedTemplates, _ := template.ParseFiles("templates/home.html")
 	err := parsedTemplates.Execute(*w, *accesses)
@@ -132,6 +154,26 @@ func editPage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	}
 }
 
+func editServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
+
+	r.ParseForm()
+	access := new(Access)
+	decoder := schema.NewDecoder()
+	decodeErr := decoder.Decode(access, r.PostForm)
+	if decodeErr != nil {
+		http.Error(w, decodeErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	accessToEditIndex := getIndexByID(access.ID, accesses)
+	if accessToEditIndex < 0 {
+		http.Error(w, "access to edit not found", http.StatusInternalServerError)
+		return
+	}
+
+	(*accesses)[accessToEditIndex] = *access
+}
+
 func main() {
 
 	inputFile := flag.String("input", "", "csv file")
@@ -151,6 +193,11 @@ func main() {
 	router := mux.NewRouter().StrictSlash(false)
 	router = addRoutes(router)
 
+	router.
+		Methods("POST").Path("/editserver").
+		Name("editserver").
+		Handler(auth(editServer, enterYourUserNamePassword, &accesses))
+
 	router.HandleFunc("/", auth(homePage, enterYourUserNamePassword, &accesses))
 	router.HandleFunc("/edit/{id}", auth(editPage, enterYourUserNamePassword, &accesses))
 	// router.HandleFunc("/personas", auth(personasPage, enterYourUserNamePassword))
@@ -161,14 +208,14 @@ func main() {
 	router.PathPrefix("/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static/"))))
 
 	fileSave := time.NewTicker(10 * time.Second)
-	go func(tick *time.Ticker) {
+	go func(tick *time.Ticker, accesses *[]Access) {
 		for {
 			select {
 			case <-fileSave.C:
-				fmt.Println("Holis ... ")
+				fmt.Printf("Time: %s\n", time.Now().String())
 			}
 		}
-	}(fileSave)
+	}(fileSave, &accesses)
 
 	fmt.Println("Starting server ...")
 	err = http.ListenAndServe(connHost+":"+connPort, router)
