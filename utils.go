@@ -54,3 +54,11 @@ func Equal(a, b []Access) bool {
 	}
 	return true
 }
+
+func getNextIndex(accesses *[]Access) int {
+	if len(*accesses) == 0 {
+		return -1
+	}
+	lastAccessElement := (*accesses)[len(*accesses)-1]
+	return lastAccessElement.ID + 1
+}

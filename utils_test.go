@@ -143,3 +143,31 @@ func TestEqual(t *testing.T) {
 		}
 	}
 }
+
+func Test_getNextIndex(t *testing.T) {
+	type test struct {
+		accesses []Access
+		want     int
+	}
+
+	tests := []test{
+		{
+			accesses: []Access{
+				Access{ID: 1},
+				Access{ID: 2},
+			},
+			want: 3,
+		},
+		{
+			accesses: []Access{},
+			want:     -1,
+		},
+	}
+
+	for _, tt := range tests {
+		got := getNextIndex(&tt.accesses)
+		if got != tt.want {
+			t.Errorf("got=[%d], want=[%d]", got, tt.want)
+		}
+	}
+}

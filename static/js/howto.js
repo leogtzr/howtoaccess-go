@@ -122,27 +122,34 @@ $(document).ready(function () {
         });
     }
 
-    $('#addperson').on('submit', function(e) {
-
+    $('#add').on('submit', function(e) {
         var currentForm = this;
         e.preventDefault();
-        var name = $('#person_name').val();
-        var personType = $('#persontypes').find(":selected").attr('name');
-        var everydays = $('#interacteverydays').find(":selected").val();
+
+        var id = $('#id').val();
+        var serverDestination = $('#serverDestination').val();
+        var userDestination = $('#userDestination').val();
+        var from = $('#from').val();
+        var notes = $('#notes').val();
 
         $.ajax({
-            url: '/addperson',
+            url: '/addserver',
             type: 'POST',
-            data: {name: name, type: personType, everydays: everydays},
+            data: {
+                id: id, 
+                serverDestination: serverDestination, 
+                userDestination: userDestination, 
+                from: from, 
+                notes: notes
+            },
             success: function(data) {
-                console.log("Good");
                 $('#person_name').val('');
                 $("#alert").fadeTo(2000, 500).slideUp(500, function() {
                     $("#alert").slideUp(500);
+                    window.location = "/";
                 });
             },
             error: function(data) {
-                console.log("Error!");
                 console.log(data);
                 $("#alert_error").fadeTo(2000, 500).slideUp(500, function() {
                     $("#alert_error").slideUp(500);
@@ -153,7 +160,6 @@ $(document).ready(function () {
     });
 
     $('#edit').on('submit', function(e) {
-
         var currentForm = this;
         e.preventDefault();
 
@@ -166,11 +172,17 @@ $(document).ready(function () {
         $.ajax({
             url: '/editserver',
             type: 'POST',
-            data: {id: id, serverDestination: serverDestination, userDestination: userDestination, from: from, notes: notes},
+            data: {
+                id: id, 
+                serverDestination: serverDestination, 
+                userDestination: userDestination, 
+                from: from, 
+                notes: notes
+            },
             success: function(data) {
                 $('#interactiontext').val('');
                 $("#alert").fadeTo(2000, 500).slideUp(500, function() {
-                    $("#alert").slideUp(500);
+                    $("#alert").slideUp(1000);
                     window.location = "/";
                 });
             },

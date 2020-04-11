@@ -99,6 +99,15 @@ func homePage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	}
 }
 
+func addPage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
+	parsedTemplates, _ := template.ParseFiles("templates/add.html")
+	err := parsedTemplates.Execute(w, *accesses)
+	if err != nil {
+		log.Print("Error occurred while executing the template or writing its output: ", err)
+		return
+	}
+}
+
 func searchByID(id int, accesses *[]Access) (Access, bool) {
 	found := false
 	var acc Access
@@ -155,7 +164,6 @@ func editPage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 }
 
 func editServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
-
 	r.ParseForm()
 	access := new(Access)
 	decoder := schema.NewDecoder()
@@ -174,6 +182,23 @@ func editServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	(*accesses)[accessToEditIndex] = *access
 }
 
+func addServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
+	r.ParseForm()
+	access := new(Access)
+	decoder := schema.NewDecoder()
+	decodeErr := decoder.Decode(access, r.PostForm)
+	if decodeErr != nil {
+		http.Error(w, decodeErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	index := getNextIndex(accesses)
+	access.ID = index
+	*accesses = append(*accesses, *access)
+
+	fmt.Printf("Accesses now: %d\n", len(*accesses))
+}
+
 func main() {
 
 	inputFile := flag.String("input", "", "csv file")
@@ -188,7 +213,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer file.Close()
+	file.Close()
 
 	router := mux.NewRouter().StrictSlash(false)
 	router = addRoutes(router)
@@ -198,13 +223,14 @@ func main() {
 		Name("editserver").
 		Handler(auth(editServer, enterYourUserNamePassword, &accesses))
 
+	router.
+		Methods("POST").Path("/addserver").
+		Name("addserver").
+		Handler(auth(addServer, enterYourUserNamePassword, &accesses))
+
 	router.HandleFunc("/", auth(homePage, enterYourUserNamePassword, &accesses))
 	router.HandleFunc("/edit/{id}", auth(editPage, enterYourUserNamePassword, &accesses))
-	// router.HandleFunc("/personas", auth(personasPage, enterYourUserNamePassword))
-	// router.HandleFunc("/stats", auth(statsPage, enterYourUserNamePassword))
-	// router.HandleFunc("/person/{id}", auth(personInfoPage, enterYourUserNamePassword))
-	// router.HandleFunc("/interaction/{id}", auth(interactionInfoPage, enterYourUserNamePassword))
-
+	router.HandleFunc("/add.html", auth(addPage, enterYourUserNamePassword, &accesses))
 	router.PathPrefix("/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static/"))))
 
 	fileSave := time.NewTicker(10 * time.Second)
