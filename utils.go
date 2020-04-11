@@ -62,3 +62,11 @@ func getNextIndex(accesses *[]Access) int {
 	lastAccessElement := (*accesses)[len(*accesses)-1]
 	return lastAccessElement.ID + 1
 }
+
+func removeElementByID(id int, accesses *[]Access) {
+	id = getIndexByID(id, accesses)
+	if id == -1 {
+		return
+	}
+	*accesses = append((*accesses)[:id], (*accesses)[id+1:]...)
+}

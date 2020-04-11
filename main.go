@@ -163,6 +163,30 @@ func editPage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	}
 }
 
+func deletePage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
+
+	vars := mux.Vars(r)
+	idParam := vars["id"]
+
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		sendHome(&w, accesses)
+		return
+	}
+	access, found := searchByID(id, accesses)
+	if !found {
+		sendHome(&w, accesses)
+		return
+	}
+
+	parsedTemplates, _ := template.ParseFiles("templates/delete.html")
+	err = parsedTemplates.Execute(w, access)
+	if err != nil {
+		log.Print("Error occurred while executing the template or writing its output: ", err)
+		return
+	}
+}
+
 func editServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	r.ParseForm()
 	access := new(Access)
@@ -199,6 +223,23 @@ func addServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	fmt.Printf("Accesses now: %d\n", len(*accesses))
 }
 
+func deleteServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
+	r.ParseForm()
+
+	access := new(
+		struct {
+			ID int `json:"id"`
+		})
+	decoder := schema.NewDecoder()
+	decodeErr := decoder.Decode(access, r.PostForm)
+	if decodeErr != nil {
+		http.Error(w, decodeErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// fmt.Printf("Server to remove: [%d]\n", access.ID)
+}
+
 func main() {
 
 	inputFile := flag.String("input", "", "csv file")
@@ -228,8 +269,14 @@ func main() {
 		Name("addserver").
 		Handler(auth(addServer, enterYourUserNamePassword, &accesses))
 
+	router.
+		Methods("POST").Path("/deleteserver").
+		Name("deleteserver").
+		Handler(auth(deleteServer, enterYourUserNamePassword, &accesses))
+
 	router.HandleFunc("/", auth(homePage, enterYourUserNamePassword, &accesses))
 	router.HandleFunc("/edit/{id}", auth(editPage, enterYourUserNamePassword, &accesses))
+	router.HandleFunc("/delete/{id}", auth(deletePage, enterYourUserNamePassword, &accesses))
 	router.HandleFunc("/add.html", auth(addPage, enterYourUserNamePassword, &accesses))
 	router.PathPrefix("/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static/"))))
 

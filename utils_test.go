@@ -171,3 +171,49 @@ func Test_getNextIndex(t *testing.T) {
 		}
 	}
 }
+
+func Test_removeElementByID(t *testing.T) {
+
+	type test struct {
+		accesses   []Access
+		idToRemove int
+		want       []Access
+	}
+
+	tests := []test{
+		{
+			accesses: []Access{
+				Access{ID: 3},
+				Access{ID: 5},
+				Access{ID: 6},
+			},
+			idToRemove: 5,
+			want: []Access{
+				Access{ID: 3},
+				Access{ID: 6},
+			},
+		},
+
+		{
+			accesses: []Access{
+				Access{ID: 3},
+				Access{ID: 5},
+				Access{ID: 6},
+			},
+			idToRemove: 56,
+			want: []Access{
+				Access{ID: 3},
+				Access{ID: 5},
+				Access{ID: 6},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		removeElementByID(tt.idToRemove, &tt.accesses)
+		if !Equal(tt.accesses, tt.want) {
+			t.Errorf("got=[%s], want=[%s]", tt.accesses, tt.want)
+		}
+	}
+
+}

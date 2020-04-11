@@ -10,7 +10,6 @@
 
     <!-- Bootstrap core CSS -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/css/bootstrap-datepicker3.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="/static/css/cbe.css" rel="stylesheet">
@@ -19,7 +18,7 @@
 <body>
 
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="/">Inicio</a>
+    <a class="navbar-brand" href="/">Home</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -65,7 +64,7 @@
                                 <div class="col-sm">
                                     <ul style="list-style-type:none;">
                                         <a href="/edit/{{.ID}}" class="btn btn-primary btn-sm">Edit</a>
-                                        <a href="delete.html?id={{.ID}}" class="btn btn-primary btn-sm btn-danger">Delete</a>
+                                        <a href="/delete/{{.ID}}" class="btn btn-primary btn-sm btn-danger">Delete</a>
                                     </ul>
                                 </div>
                             </div>
@@ -77,43 +76,17 @@
               </table>
         </div>
     </div>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4">
-                <h2>A</h2>
-                <ul class="list-group list-group-flush" id="family_interactions">
-                </ul>
-            </div>
-            <div class="col-md-4">
-                <h2>B</h2>
-                <ul class="list-group list-group-flush" id="friend_interactions">
-                </ul>
-            </div>
-            <div class="col-md-4">
-                <h2>C</h2>
-                <ul class="list-group list-group-flush" id="coworkers_interactions">
-                </ul>
-            </div>
-        </div>
-
-        <hr>
-
-    </div> <!-- /container -->
-
 </main>
 
 <footer class="container">
-    <p>&copy; B2B 2020</p>
+    <p>B2B</p>
 </footer>
 
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/static/js/popper.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-3.3.1.min.js"></script>
-    <script src="/static/js/bootstrap-datepicker.min.js"></script>
     <script src="/static/js/howto.js"></script>
 </body>
 </html>
