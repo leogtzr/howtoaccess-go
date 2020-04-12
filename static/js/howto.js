@@ -83,7 +83,6 @@ $(document).ready(function () {
                 notes: notes
             },
             success: function(data) {
-                $('#interactiontext').val('');
                 $("#alert").fadeTo(2000, 500).slideUp(500, function() {
                     $("#alert").slideUp(700);
                     window.location = "/";
