@@ -70,3 +70,28 @@ func removeElementByID(id int, accesses *[]Access) {
 	}
 	*accesses = append((*accesses)[:id], (*accesses)[id+1:]...)
 }
+
+func searchByID(id int, accesses *[]Access) (Access, bool) {
+	found := false
+	var acc Access
+	for _, a := range *accesses {
+		if a.ID == id {
+			acc = a
+			found = true
+			break
+		}
+	}
+
+	return acc, found
+}
+
+func getIndexByID(id int, accesses *[]Access) int {
+	idx := -1
+	for i, a := range *accesses {
+		if a.ID == id {
+			idx = i
+			break
+		}
+	}
+	return idx
+}
