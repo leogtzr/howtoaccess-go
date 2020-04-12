@@ -5,20 +5,23 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"time"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 )
 
 var (
-	cbeUser     = "root"
-	cbePassword = "lein23"
-	connHost    = "localhost"
-	connPort    = "8081"
+	user     = "root"
+	password = "lein23"
+	connHost = "localhost"
+	connPort = "8081"
+
+	inputFile *string
 
 	routes = Routes{
 
@@ -41,8 +44,8 @@ var (
 func auth(handler HandlerFunc2, realm string, accesses *[]Access) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, pass, ok := r.BasicAuth()
-		if !ok || subtle.ConstantTimeCompare([]byte(user), []byte(cbeUser)) != 1 ||
-			subtle.ConstantTimeCompare([]byte(pass), []byte(cbePassword)) != 1 {
+		if !ok || subtle.ConstantTimeCompare([]byte(user), []byte(user)) != 1 ||
+			subtle.ConstantTimeCompare([]byte(pass), []byte(password)) != 1 {
 			w.Header().Set("WWW-Authenticate", `Basic realm="`+realm+`"`)
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("You are Unauthorized to access the application.\n"))
@@ -55,14 +58,13 @@ func auth(handler HandlerFunc2, realm string, accesses *[]Access) http.HandlerFu
 
 func addRoutes(router *mux.Router) *mux.Router {
 	for _, route := range routes {
-		router.Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
+		router.Methods(route.Method).Path(route.Pattern).Name(route.Name).
 			Handler(route.HandlerFunc)
 
 	}
 	return router
 }
+
 func sendHome(w *http.ResponseWriter, accesses *[]Access) {
 	parsedTemplates, _ := template.ParseFiles("templates/home.html")
 	err := parsedTemplates.Execute(*w, *accesses)
@@ -102,12 +104,13 @@ func addServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	access.ID = index
 	*accesses = append(*accesses, *access)
 
-	fmt.Printf("Accesses now: %d\n", len(*accesses))
+	if err := save(accesses); err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+	}
 }
 
 func deleteServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	r.ParseForm()
-
 	access := new(
 		struct {
 			ID int `json:"id"`
@@ -118,13 +121,25 @@ func deleteServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 		http.Error(w, decodeErr.Error(), http.StatusInternalServerError)
 		return
 	}
+	removeElementByID(access.ID, accesses)
+	if err := save(accesses); err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+	}
+}
 
-	// fmt.Printf("Server to remove: [%d]\n", access.ID)
+func save(accesses *[]Access) error {
+	var sb strings.Builder
+	sb.WriteString("Destination (Server Name),User (Destination),Access from,Notes\n")
+	for _, a := range *accesses {
+		sb.WriteString(a.ToCSV())
+		sb.WriteString("\n")
+	}
+	return ioutil.WriteFile(*inputFile, []byte(sb.String()), 0644)
 }
 
 func main() {
 
-	inputFile := flag.String("input", "", "csv file")
+	inputFile = flag.String("input", "", "csv file")
 	flag.Parse()
 
 	if len(*inputFile) == 0 {
@@ -138,44 +153,9 @@ func main() {
 	}
 	file.Close()
 
-	router := mux.NewRouter().StrictSlash(false)
-	router = addRoutes(router)
+	router := NewRouter(&accesses)
 
-	router.
-		Methods("POST").Path("/editserver").
-		Name("editserver").
-		Handler(auth(editServer, enterYourUserNamePassword, &accesses))
-
-	router.
-		Methods("POST").Path("/addserver").
-		Name("addserver").
-		Handler(auth(addServer, enterYourUserNamePassword, &accesses))
-
-	router.
-		Methods("POST").Path("/deleteserver").
-		Name("deleteserver").
-		Handler(auth(deleteServer, enterYourUserNamePassword, &accesses))
-
-	router.HandleFunc("/", auth(homePage, enterYourUserNamePassword, &accesses))
-	router.HandleFunc("/edit/{id}", auth(editPage, enterYourUserNamePassword, &accesses))
-	router.HandleFunc("/delete/{id}", auth(deletePage, enterYourUserNamePassword, &accesses))
-	router.HandleFunc("/add.html", auth(addPage, enterYourUserNamePassword, &accesses))
-	router.PathPrefix("/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static/"))))
-
-	fileSave := time.NewTicker(1 * time.Minute)
-	go func(tick *time.Ticker, accesses *[]Access) {
-		for {
-			select {
-			case <-fileSave.C:
-				// fmt.Printf("Time: %s\n", time.Now().String())
-			}
-		}
-	}(fileSave, &accesses)
-
-	fmt.Println("Starting server ...")
-	err = http.ListenAndServe(connHost+":"+connPort, router)
-	if err != nil {
+	if err = http.ListenAndServe(connHost+":"+connPort, router); err != nil {
 		log.Fatal("error starting http server: ", err)
-		return
 	}
 }

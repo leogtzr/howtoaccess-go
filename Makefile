@@ -4,6 +4,7 @@
 BIN_FILE=howtoaccess
 
 install:
+	go test
 	go build -o "${BIN_FILE}"
 
 clean:

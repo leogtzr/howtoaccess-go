@@ -37,8 +37,7 @@ func TestAccess_String(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := tt.acc.String()
-		if got != tt.want {
+		if got := tt.acc.String(); got != tt.want {
 			t.Errorf("got=[%s], want=[%s]", got, tt.want)
 		}
 	}
@@ -85,8 +84,7 @@ pr-galaxie-xl25,up000176,hola123,Password,Another,Hmmmm`),
 
 	for _, tt := range tests {
 		got, err := extractAccessesFromFile(tt.file)
-		hasError := err != nil
-		if hasError != tt.shouldFail {
+		if hasError := err != nil; hasError != tt.shouldFail {
 			t.Errorf("It should have failed to parse, flag is = [%t]", tt.shouldFail)
 		}
 		if !Equal(got, tt.records) {
@@ -165,8 +163,7 @@ func Test_getNextIndex(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := getNextIndex(&tt.accesses)
-		if got != tt.want {
+		if got := getNextIndex(&tt.accesses); got != tt.want {
 			t.Errorf("got=[%d], want=[%d]", got, tt.want)
 		}
 	}
@@ -216,4 +213,66 @@ func Test_removeElementByID(t *testing.T) {
 		}
 	}
 
+}
+
+func TestAccess_ToCSV(t *testing.T) {
+	type test struct {
+		access Access
+		want   string
+	}
+
+	tests := []test{
+		test{
+			access: Access{ID: 1, ServerDestination: "a", UserDestination: "b", From: "c", Notes: "d"},
+			want:   "a,b,c,d",
+		},
+		test{
+			access: Access{ID: 1, ServerDestination: "a", UserDestination: "b", From: "c"},
+			want:   "a,b,c,",
+		},
+	}
+
+	for _, tt := range tests {
+		if got := tt.access.ToCSV(); got != tt.want {
+			t.Errorf("got=[%s], want=[%s]", got, tt.want)
+		}
+	}
+}
+
+func Test_searchByID(t *testing.T) {
+
+	accesses := []Access{
+		Access{ID: 1, ServerDestination: "s1", UserDestination: "u1", From: "f1", Notes: "n1"},
+		Access{ID: 2, ServerDestination: "s2", UserDestination: "u2", From: "f2", Notes: "n2"},
+		Access{ID: 3, ServerDestination: "s3", UserDestination: "u3", From: "f3", Notes: "n3"},
+	}
+
+	type test struct {
+		id       int
+		accesses []Access
+		wasFound bool
+		want     Access
+	}
+
+	tests := []test{
+		test{
+			id:       1,
+			accesses: accesses,
+			want:     Access{ID: 1, ServerDestination: "s1", UserDestination: "u1", From: "f1", Notes: "n1"},
+			wasFound: true,
+		},
+
+		test{
+			id:       5,
+			accesses: accesses,
+			want:     Access{},
+			wasFound: false,
+		},
+	}
+
+	for _, tt := range tests {
+		if got, found := searchByID(tt.id, &tt.accesses); found != tt.wasFound || got != tt.want {
+			t.Errorf("searchByID, expecting [%t], got [%t]", tt.wasFound, found)
+		}
+	}
 }

@@ -4,6 +4,9 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // String ...
@@ -12,6 +15,11 @@ func (a Access) String() string {
 		return fmt.Sprintf("%d: %s@%s from %s (%s)", a.ID, a.ServerDestination, a.UserDestination, a.From, a.Notes)
 	}
 	return fmt.Sprintf("%d: %s@%s from %s", a.ID, a.ServerDestination, a.UserDestination, a.From)
+}
+
+// ToCSV ...
+func (a Access) ToCSV() string {
+	return fmt.Sprintf("%s,%s,%s,%s", a.ServerDestination, a.UserDestination, a.From, a.Notes)
 }
 
 func extractAccessesFromFile(file io.Reader) ([]Access, error) {
@@ -69,6 +77,8 @@ func removeElementByID(id int, accesses *[]Access) {
 		return
 	}
 	*accesses = append((*accesses)[:id], (*accesses)[id+1:]...)
+	// (*accesses)[id] = (*accesses)[len(*accesses)-1]
+	// *accesses = (*accesses)[:len(*accesses)-1]
 }
 
 func searchByID(id int, accesses *[]Access) (Access, bool) {
@@ -94,4 +104,32 @@ func getIndexByID(id int, accesses *[]Access) int {
 		}
 	}
 	return idx
+}
+
+// NewRouter ...
+func NewRouter(accesses *[]Access) *mux.Router {
+	router := mux.NewRouter().StrictSlash(false)
+	router = addRoutes(router)
+
+	router.
+		Methods("POST").Path("/editserver").
+		Name("editserver").
+		Handler(auth(editServer, enterYourUserNamePassword, accesses))
+
+	router.
+		Methods("POST").Path("/addserver").
+		Name("addserver").
+		Handler(auth(addServer, enterYourUserNamePassword, accesses))
+
+	router.
+		Methods("POST").Path("/deleteserver").
+		Name("deleteserver").
+		Handler(auth(deleteServer, enterYourUserNamePassword, accesses))
+
+	router.HandleFunc("/", auth(homePage, enterYourUserNamePassword, accesses))
+	router.HandleFunc("/edit/{id}", auth(editPage, enterYourUserNamePassword, accesses))
+	router.HandleFunc("/delete/{id}", auth(deletePage, enterYourUserNamePassword, accesses))
+	router.HandleFunc("/add.html", auth(addPage, enterYourUserNamePassword, accesses))
+	router.PathPrefix("/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static/"))))
+	return router
 }

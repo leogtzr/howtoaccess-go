@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
-	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -11,19 +12,15 @@ import (
 
 func homePage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	parsedTemplates, _ := template.ParseFiles("templates/index.html")
-	err := parsedTemplates.Execute(w, *accesses)
-	if err != nil {
-		log.Print("Error occurred while executing the template or writing its output: ", err)
-		return
+	if err := parsedTemplates.Execute(w, *accesses); err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
 	}
 }
 
 func addPage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	parsedTemplates, _ := template.ParseFiles("templates/add.html")
-	err := parsedTemplates.Execute(w, *accesses)
-	if err != nil {
-		log.Print("Error occurred while executing the template or writing its output: ", err)
-		return
+	if err := parsedTemplates.Execute(w, *accesses); err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
 	}
 }
 
@@ -44,10 +41,8 @@ func editPage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	}
 
 	parsedTemplates, _ := template.ParseFiles("templates/edit.html")
-	err = parsedTemplates.Execute(w, access)
-	if err != nil {
-		log.Print("Error occurred while executing the template or writing its output: ", err)
-		return
+	if err = parsedTemplates.Execute(w, access); err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
 	}
 }
 
@@ -68,9 +63,8 @@ func deletePage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	}
 
 	parsedTemplates, _ := template.ParseFiles("templates/delete.html")
-	err = parsedTemplates.Execute(w, access)
-	if err != nil {
-		log.Print("Error occurred while executing the template or writing its output: ", err)
+	if err = parsedTemplates.Execute(w, access); err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
 		return
 	}
 }
