@@ -34,20 +34,20 @@
             <form method="post" id="edit">
                 <div class="form-group">
                     <input type="hidden" value="{{.ID}}" id="id"/>
-                    <label for="persons">Server Destination</label>
-                    <input type="text" class="form-control" id="serverDestination" required value="{{.ServerDestination}}"/>
+                    <label for="serverDestination">Server Destination</label>
+                    <input type="text" class="form-control" id="serverDestination" name="serverDestination" required value="{{.ServerDestination}}"/>
                 </div>
                 <div class="form-group">
-                    <label for="persons">User Destination</label>
-                    <input type="text" class="form-control" id="userDestination" required value="{{.UserDestination}}"/>
+                    <label for="userDestination">User Destination</label>
+                    <input type="text" class="form-control" id="userDestination" name="userDestination" required value="{{.UserDestination}}"/>
                 </div>
                 <div class="form-group">
-                    <label for="persons">From</label>
-                    <input type="text" class="form-control" id="from" required value="{{.From}}"/>
+                    <label for="from">From</label>
+                    <input type="text" class="form-control" id="from" name="from" required value="{{.From}}"/>
                 </div>
                 <div class="form-group">
-                    <label for="persons">Notes</label>
-                    <textarea class="form-control" id="notes">{{.Notes}}</textarea>
+                    <label for="notes">Notes</label>
+                    <textarea class="form-control" id="notes" name="notes">{{.Notes}}</textarea>
                 </div>
 
                 <div class="alert alert-danger alert-dismissible fade show" role="alert" id="alert_error">

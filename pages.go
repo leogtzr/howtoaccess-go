@@ -25,7 +25,6 @@ func addPage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 }
 
 func editPage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
-
 	vars := mux.Vars(r)
 	idParam := vars["id"]
 
@@ -47,7 +46,6 @@ func editPage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 }
 
 func deletePage(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
-
 	vars := mux.Vars(r)
 	idParam := vars["id"]
 
