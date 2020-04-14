@@ -87,7 +87,7 @@ pr-galaxie-xl25,up000176,hola123,Password,Another,Hmmmm`),
 		if hasError := err != nil; hasError != tt.shouldFail {
 			t.Errorf("It should have failed to parse, flag is = [%t]", tt.shouldFail)
 		}
-		if !Equal(got, tt.records) {
+		if !equal(got, tt.records) {
 			t.Errorf("got=[%s], want=[%s]", got, tt.records)
 		}
 	}
@@ -136,7 +136,7 @@ func TestEqual(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		if got := Equal(tt.a, tt.b); got != tt.result {
+		if got := equal(tt.a, tt.b); got != tt.result {
 			t.Errorf("[%s] and [%s] should be equal", tt.a, tt.b)
 		}
 	}
@@ -208,7 +208,7 @@ func Test_removeElementByID(t *testing.T) {
 
 	for _, tt := range tests {
 		removeElementByID(tt.idToRemove, &tt.accesses)
-		if !Equal(tt.accesses, tt.want) {
+		if !equal(tt.accesses, tt.want) {
 			t.Errorf("got=[%s], want=[%s]", tt.accesses, tt.want)
 		}
 	}

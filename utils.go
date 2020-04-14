@@ -50,8 +50,7 @@ func extractAccessesFromFile(file io.Reader) ([]Access, error) {
 	return records, nil
 }
 
-// Equal ...
-func Equal(a, b []Access) bool {
+func equal(a, b []Access) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -77,8 +76,6 @@ func removeElementByID(id int, accesses *[]Access) {
 		return
 	}
 	*accesses = append((*accesses)[:id], (*accesses)[id+1:]...)
-	// (*accesses)[id] = (*accesses)[len(*accesses)-1]
-	// *accesses = (*accesses)[:len(*accesses)-1]
 }
 
 func searchByID(id int, accesses *[]Access) (Access, bool) {
@@ -131,5 +128,6 @@ func NewRouter(accesses *[]Access) *mux.Router {
 	router.HandleFunc("/delete/{id}", auth(deletePage, enterYourUserNamePassword, accesses))
 	router.HandleFunc("/add.html", auth(addPage, enterYourUserNamePassword, accesses))
 	router.PathPrefix("/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static/"))))
+
 	return router
 }

@@ -74,9 +74,7 @@ func sendHome(w *http.ResponseWriter, accesses *[]Access) {
 func editServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	r.ParseForm()
 	access := new(Access)
-	decoder := schema.NewDecoder()
-	decodeErr := decoder.Decode(access, r.PostForm)
-	if decodeErr != nil {
+	if decodeErr := schema.NewDecoder().Decode(access, r.PostForm); decodeErr != nil {
 		http.Error(w, decodeErr.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -93,9 +91,7 @@ func editServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 func addServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 	r.ParseForm()
 	access := new(Access)
-	decoder := schema.NewDecoder()
-	decodeErr := decoder.Decode(access, r.PostForm)
-	if decodeErr != nil {
+	if decodeErr := schema.NewDecoder().Decode(access, r.PostForm); decodeErr != nil {
 		http.Error(w, decodeErr.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -115,9 +111,7 @@ func deleteServer(w http.ResponseWriter, r *http.Request, accesses *[]Access) {
 		struct {
 			ID int `json:"id"`
 		})
-	decoder := schema.NewDecoder()
-	decodeErr := decoder.Decode(access, r.PostForm)
-	if decodeErr != nil {
+	if decodeErr := schema.NewDecoder().Decode(access, r.PostForm); decodeErr != nil {
 		http.Error(w, decodeErr.Error(), http.StatusInternalServerError)
 		return
 	}
