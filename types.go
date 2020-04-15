@@ -24,3 +24,9 @@ type HandlerFunc2 func(http.ResponseWriter, *http.Request, *[]Access)
 
 // Routes ...
 type Routes []Route
+
+// HealthState ...
+type HealthState struct {
+	State         int
+	ErrorMessages []string
+}

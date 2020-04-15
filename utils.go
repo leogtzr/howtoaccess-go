@@ -123,6 +123,11 @@ func NewRouter(accesses *[]Access) *mux.Router {
 		Name("deleteserver").
 		Handler(auth(deleteServer, enterYourUserNamePassword, accesses))
 
+	router.
+		Methods("GET").Path("/healthcheck").
+		Name("healthcheck").
+		Handler(healthCheckHandler(accesses))
+
 	router.HandleFunc("/", auth(homePage, enterYourUserNamePassword, accesses))
 	router.HandleFunc("/edit/{id}", auth(editPage, enterYourUserNamePassword, accesses))
 	router.HandleFunc("/delete/{id}", auth(deletePage, enterYourUserNamePassword, accesses))

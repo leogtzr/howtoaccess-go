@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/subtle"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
@@ -53,6 +54,17 @@ func auth(handler HandlerFunc2, realm string, accesses *[]Access) http.HandlerFu
 		}
 
 		handler(w, r, accesses)
+	}
+}
+
+func healthCheckHandler(accesses *[]Access) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		outputState := &HealthState{}
+		// TODO: add some checks here.
+		outputState.State = http.StatusOK
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(outputState.State)
+		json.NewEncoder(w).Encode(outputState)
 	}
 }
 
